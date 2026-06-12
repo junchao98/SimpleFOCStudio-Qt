@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=SimpleFOCStudio
+Comment=SimpleFOC Motor Controller Configuration Tool
+Exec=SimpleFOCStudio
+Icon=simplefocstudio
+Categories=Development;Electronics;Qt;
+Terminal=false
+StartupNotify=true
