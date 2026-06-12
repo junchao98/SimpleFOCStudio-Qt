@@ -16,95 +16,47 @@ SimpleFOC Configuration Tool 的 Qt C++ 重新实现版本。用于配置和调�
 - **自定义命令**：支持用户自定义串口命令（树形视图）
 - **命令行工具**：独立的串口终端工具
 
-## 依赖
+## 快速安装（Ubuntu 22.04）
 
-- **C++17** 编译器（GCC 10+ / Clang 14+）
-- **CMake** 3.16+
-- **Qt 6.x**（需要以下模块）：
-  - Qt6::Core
-  - Qt6::Gui / Qt6::Widgets
-  - Qt6::SerialPort
-  - Qt6::Charts
-
-## Ubuntu 22.04 安装与编译
-
-### 1. 安装系统依赖
+从 [Releases](https://github.com/junchao98/SimpleFOCStudio-Qt/releases) 下载最新 deb 包：
 
 ```bash
-sudo apt update
-sudo apt install -y build-essential cmake git libgl1-mesa-dev libegl1-mesa-dev \
-    libxkbcommon-x11-0 libxcb-xinerama0 libxcb-cursor0 libdbus-1-3 \
-    libfontconfig1 libfreetype6 libglib2.0-0 libxrender1 libxcb-icccm4 \
-    libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 \
-    libxcb-shape0 libxcb-shm0 libxcb-sync1 libxcb-xfixes0
+sudo apt install -y libqt6core6 libqt6gui6 libqt6widgets6 libqt6serialport6 libqt6charts6
+sudo dpkg -i simplefocstudio_1.0.0_amd64.deb
 ```
 
-### 2. 安装 Qt6
+## 从源码编译
 
-**方式 A：从源码编译（推荐，可自定义模块）**
+### 1. 安装依赖
 
 ```bash
-# 下载 Qt 6.9.2 源码
-wget https://download.qt.io/archive/qt/6.9/6.9.2/single/qt-everywhere-src-6.9.2.tar.xz
-tar xf qt-everywhere-src-6.9.2.tar.xz
-cd qt-everywhere-src-6.9.2
-
-# 配置（只编译需要的模块，大幅节省时间）
-./configure \
-    -release \
-    -opensource -confirm-license \
-    -skip qt3d -skip qt5compat -skip qtwebengine -skip qtvirtualkeyboard \
-    -skip qtquick3d -skip qtquicktimeline -skip qtshadertools \
-    -nomake examples -nomake tests \
-    -prefix /opt/Qt/6.9.2
-
-# 编译安装（根据 CPU 核心数调整 -j 参数）
-cmake --build . --parallel $(nproc)
-sudo cmake --install .
-
-cd ..
+sudo apt install -y build-essential cmake git \
+    qt6-base-dev libqt6serialport6-dev libqt6charts6-dev
 ```
 
-**方式 B：通过 APT 安装（Ubuntu 22.04 自带 Qt 6.2）**
+### 2. 编译
 
 ```bash
-sudo apt install -y qt6-base-dev qt6-serialport-dev qt6-charts-dev
-```
-
-> 注意：方式 B 安装的 Qt 版本较旧（6.2），但功能上兼容本项目。如果使用方式 B，编译时需要移除 CMakeLists.txt 中的 `set(Qt6_DIR ...)` 行，让 CMake 自动查找系统 Qt。
-
-### 3. 获取源码
-
-```bash
-git clone <repository-url> SimpleFOCStudio-Qt
+git clone https://github.com/junchao98/SimpleFOCStudio-Qt.git
 cd SimpleFOCStudio-Qt
-```
-
-### 4. 编译
-
-```bash
-# 创建构建目录
 mkdir build && cd build
-
-# 配置（方式 A：源码编译的 Qt）
-cmake .. -DQt6_DIR=/opt/Qt/6.9.2/lib/cmake/Qt6
-
-# 或配置（方式 B：APT 安装的 Qt）
-cmake ..
-
-# 编译
+cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . --parallel $(nproc)
 ```
 
-### 5. 运行
+### 3. 运行
 
 ```bash
-# 方式 A 需要设置库路径
-LD_LIBRARY_PATH=/opt/Qt/6.9.2/lib:$LD_LIBRARY_PATH ./SimpleFOCStudio
-
-# 方式 B 直接运行
 ./SimpleFOCStudio
 ```
+
+### 4. 构建 deb 包
+
+```bash
+./tools/deb/build.sh
+```
+
+详见 [tools/deb/](tools/deb/) 目录。
 
 ## 项目结构
 
@@ -115,6 +67,11 @@ SimpleFOCStudio-Qt/
 ├── resources/
 │   ├── resources.qrc           # Qt 资源文件
 │   └── icons/                  # 49 个 PNG 图标
+├── tools/
+│   └── deb/                    # deb 打包脚本
+│       ├── build.sh            # 一键打包
+│       ├── DEBIAN/control      # 包元数据
+│       └── simplefocstudio.desktop
 └── src/
     ├── main.cpp                # 程序入口
     ├── core/                   # 核心逻辑
