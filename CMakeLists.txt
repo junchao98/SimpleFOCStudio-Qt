@@ -7,11 +7,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(Qt6_DIR "/home/junchao/work/plugin/qt/qt-everywhere-src-6.9.2/qt-build/qt-install/6.9.2/lib/cmake/Qt6")
-
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets SerialPort Charts)
-
-qt_standard_project_setup()
 
 set(SOURCES
     src/main.cpp
@@ -98,9 +94,4 @@ target_link_libraries(SimpleFOCStudio PRIVATE
     Qt6::Widgets
     Qt6::SerialPort
     Qt6::Charts
-)
-
-set_target_properties(SimpleFOCStudio PROPERTIES
-    WIN32_EXECUTABLE TRUE
-    MACOSX_BUNDLE TRUE
 )
