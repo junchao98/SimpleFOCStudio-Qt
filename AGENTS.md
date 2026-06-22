@@ -26,7 +26,7 @@ Linux 输出 `build/SimpleFOCStudio`，Windows 输出 `build/Release/SimpleFOCSt
 - **GUI** (`src/gui/`): `MainWindow` 持有 `WorkAreaTabWidget` + `ToolBar`，两种主视图：
   - `formview/` — 表单视图（`DeviceConfigurationTool` 为主标签页容器）
   - `treeview/` — 树形视图（`TreeViewConfigTool`）
-- **工具** (`src/gui/tools/`): 串口终端、Arduino 代码生成器、JSON 设备序列化
+- **工具** (`src/gui/tools/`): 串口终端、JSON 设备序列化
 - **资源**: `resources/resources.qrc` 嵌入 `resources/icons/` 中的 PNG 图标
 
 GUI 类均为 Qt Designer 风格的 `.h/.cpp` 配对，CMake 启用了 `AUTOMOC`/`AUTORCC`/`AUTOUIC`。新增 `.cpp`/`.h` 文件必须同时加入 `CMakeLists.txt` 的 `SOURCES` 和 `HEADERS`。

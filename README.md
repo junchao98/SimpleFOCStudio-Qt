@@ -11,7 +11,6 @@ SimpleFOC Configuration Tool 的 Qt C++ 重新实现版本。用于配置和调�
 - **PID 在线调参**：Velocity / Angle / Current Q / Current D 四组 PID 参数实时调整
 - **串口通信**：支持自定义波特率、校验位、数据位、停止位
 - **点动控制**：正向/反向快速点动，可配置步进增量
-- **Arduino 代码生成**：根据当前参数自动生成 SimpleFOC 初始化代码
 - **设备配置文件**：JSON 格式的设备参数保存/加载
 - **自定义命令**：支持用户自定义串口命令（树形视图）
 - **命令行工具**：独立的串口终端工具
@@ -89,8 +88,7 @@ SimpleFOCStudio-Qt/
     │   │   ├── SerialPortComboBox # 自动检测串口
     │   │   └── CommandLineWidget  # 串口命令行终端
     │   ├── dialogs/            # 对话框
-    │   │   ├── ConfigureConnectionDialog # 串口配置
-    │   │   └── GenerateCodeDialog        # 代码生成选项
+    │   │   └── ConfigureConnectionDialog # 串口配置
     │   ├── formview/           # 表单视图
     │   │   ├── DeviceConfigurationTool   # 主表单标签页
     │   │   ├── DRODisplayWidget          # 4 位数字 LCD 显示
@@ -109,8 +107,6 @@ SimpleFOCStudio-Qt/
     │   │   └── DeviceInteractionFrame    # 右侧面板
     │   └── tools/              # 工具
     │       ├── CommandLineTool           # 独立串口终端
-    │       ├── GeneratedCodeDisplay      # 代码展示
-    │       ├── CodeGenerator             # Arduino 代码生成
     │       └── JsonDeviceSerializer      # JSON 读写
 ```
 

@@ -20,7 +20,6 @@ set(SOURCES
     src/gui/shared/SerialPortComboBox.cpp
     src/gui/shared/CommandLineWidget.cpp
     src/gui/dialogs/ConfigureConnectionDialog.cpp
-    src/gui/dialogs/GenerateCodeDialog.cpp
     src/gui/formview/DRODisplayWidget.cpp
     src/gui/formview/ControlLoopConfig.cpp
     src/gui/formview/TorqueConfig.cpp
@@ -38,8 +37,6 @@ set(SOURCES
     src/gui/treeview/TreeViewConfigTool.cpp
     src/gui/tools/CommandLineTool.cpp
     src/gui/tools/ConfigureConnectionWidget.cpp
-    src/gui/tools/GeneratedCodeDisplay.cpp
-    src/gui/tools/CodeGenerator.cpp
     src/gui/tools/JsonDeviceSerializer.cpp
     src/gui/MainWindow.cpp
     src/gui/WorkAreaTabWidget.cpp
@@ -56,7 +53,6 @@ set(HEADERS
     src/gui/shared/SerialPortComboBox.h
     src/gui/shared/CommandLineWidget.h
     src/gui/dialogs/ConfigureConnectionDialog.h
-    src/gui/dialogs/GenerateCodeDialog.h
     src/gui/formview/DRODisplayWidget.h
     src/gui/formview/ControlLoopConfig.h
     src/gui/formview/TorqueConfig.h
@@ -74,8 +70,6 @@ set(HEADERS
     src/gui/treeview/TreeViewConfigTool.h
     src/gui/tools/CommandLineTool.h
     src/gui/tools/ConfigureConnectionWidget.h
-    src/gui/tools/GeneratedCodeDisplay.h
-    src/gui/tools/CodeGenerator.h
     src/gui/tools/JsonDeviceSerializer.h
     src/gui/MainWindow.h
     src/gui/WorkAreaTabWidget.h

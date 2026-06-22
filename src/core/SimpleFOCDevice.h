@@ -154,8 +154,6 @@ class SimpleFOCDevice : public QObject
     void pushConfiguration();
     void pullPIDConf(PIDController& pid, LowPassFilter& lpf);
 
-    QString toArduinoCode(const QList<bool>& generateParams = {}) const;
-
     QString openedFile;
 
     PIDController PIDVelocity{VELOCITY_PID};

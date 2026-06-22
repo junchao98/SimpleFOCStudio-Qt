@@ -90,17 +90,14 @@ GraphicWidget::GraphicWidget(QWidget* parent)
     mainLayout->addWidget(titleLabel);
 
     m_chart = new QChart();
-    m_chart->legend()->setVisible(true);
-    m_chart->legend()->setAlignment(Qt::AlignBottom);
+    m_chart->legend()->setVisible(false);
 
     auto* axisX = new QValueAxis();
     axisX->setRange(-BUFFER_SIZE, 0);
-    axisX->setTitleText("Samples");
     m_chart->addAxis(axisX, Qt::AlignBottom);
 
     auto* axisY = new QValueAxis();
     axisY->setRange(-100, 100);
-    axisY->setTitleText("Value");
     m_chart->addAxis(axisY, Qt::AlignLeft);
 
     for(int i = 0; i < 7; ++i)
