@@ -5,17 +5,17 @@
 #include <QMenu>
 #include <QAction>
 
-ToolBar::ToolBar(const QString &title, QWidget *parent, WorkAreaTabWidget *tabWidget)
+ToolBar::ToolBar(const QString& title, QWidget* parent, WorkAreaTabWidget* tabWidget)
     : QToolBar(title, parent)
 {
-    auto *addDeviceBtn = new QToolButton(this);
+    auto* addDeviceBtn = new QToolButton(this);
     addDeviceBtn->setIcon(GUIToolKit::getIconByName("add_motor"));
     addDeviceBtn->setPopupMode(QToolButton::InstantPopup);
     addDeviceBtn->setToolTip("Add Device");
 
-    auto *addMenu = new QMenu(addDeviceBtn);
-    auto *treeAction = addMenu->addAction(GUIToolKit::getIconByName("tree"), "Tree View");
-    auto *formAction = addMenu->addAction(GUIToolKit::getIconByName("form"), "Form View");
+    auto* addMenu    = new QMenu(addDeviceBtn);
+    auto* treeAction = addMenu->addAction(GUIToolKit::getIconByName("tree"), "Tree View");
+    auto* formAction = addMenu->addAction(GUIToolKit::getIconByName("form"), "Form View");
 
     connect(treeAction, &QAction::triggered, tabWidget, &WorkAreaTabWidget::addDeviceTree);
     connect(formAction, &QAction::triggered, tabWidget, &WorkAreaTabWidget::addDeviceForm);
@@ -23,18 +23,15 @@ ToolBar::ToolBar(const QString &title, QWidget *parent, WorkAreaTabWidget *tabWi
     addDeviceBtn->setMenu(addMenu);
     addWidget(addDeviceBtn);
 
-    auto *openAction = addAction(GUIToolKit::getIconByName("open"), "Open");
+    auto* openAction = addAction(GUIToolKit::getIconByName("open"), "Open");
     connect(openAction, &QAction::triggered, tabWidget, &WorkAreaTabWidget::openDevice);
 
-    auto *saveAction = addAction(GUIToolKit::getIconByName("save"), "Save");
+    auto* saveAction = addAction(GUIToolKit::getIconByName("save"), "Save");
     connect(saveAction, &QAction::triggered, tabWidget, &WorkAreaTabWidget::saveDevice);
-
-    auto *genAction = addAction(GUIToolKit::getIconByName("gen"), "Generate Code");
-    connect(genAction, &QAction::triggered, tabWidget, &WorkAreaTabWidget::generateCode);
 
     addSeparator();
 
-    auto *consoleAction = addAction(GUIToolKit::getIconByName("consoletool"), "Serial Console");
+    auto* consoleAction = addAction(GUIToolKit::getIconByName("consoletool"), "Serial Console");
     consoleAction->setToolTip("Open Serial Console tool");
     connect(consoleAction, &QAction::triggered, tabWidget, &WorkAreaTabWidget::openConsoleTool);
 
