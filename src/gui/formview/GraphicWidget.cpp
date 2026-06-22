@@ -11,30 +11,28 @@
 
 // QtCharts types are available via the <QtCharts> include in the header
 
-static const QColor channelColors[7] = {
-    QColor(255, 92, 92),
-    QColor(91, 141, 236),
-    QColor(75, 0, 130),
-    QColor(255, 255, 51),
-    QColor(222, 184, 135),
-    QColor(253, 172, 66),
-    QColor(57, 217, 138)
-};
+static const QColor channelColors[7] = {QColor(255, 92, 92),
+                                        QColor(91, 141, 236),
+                                        QColor(75, 0, 130),
+                                        QColor(255, 255, 51),
+                                        QColor(222, 184, 135),
+                                        QColor(253, 172, 66),
+                                        QColor(57, 217, 138)};
 
-static const QString channelNames[7] = {
-    "Target", "Vq [Volts]", "Vd [Volts]",
-    "Cq [milliAmps]", "Cd [milliAmps]",
-    "Vel [rad/sec]", "Angle [rad]"
-};
+static const QString channelNames[7] = {"Target",
+                                        "Vq [Volts]",
+                                        "Vd [Volts]",
+                                        "Cq [milliAmps]",
+                                        "Cd [milliAmps]",
+                                        "Vel [rad/sec]",
+                                        "Angle [rad]"};
 
 static const QStringList dotIcons = {
-    "reddot", "bluedot", "purpledot", "yellowdot", "maroondot", "orangedot", "greendot"
-};
+    "reddot", "bluedot", "purpledot", "yellowdot", "maroondot", "orangedot", "greendot"};
 
-ControlPlotPanel::ControlPlotPanel(QWidget *parent)
-    : QWidget(parent)
+ControlPlotPanel::ControlPlotPanel(QWidget* parent) : QWidget(parent)
 {
-    auto *layout = new QHBoxLayout(this);
+    auto* layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
 
     m_startStopBtn = new QPushButton();
@@ -58,11 +56,12 @@ ControlPlotPanel::ControlPlotPanel(QWidget *parent)
     connect(m_viewAllBtn, &QPushButton::clicked, this, &ControlPlotPanel::viewAllClicked);
     layout->addWidget(m_viewAllBtn);
 
-    for (int i = 0; i < 7; ++i) {
+    for(int i = 0; i < 7; ++i)
+    {
         m_channelChecks[i] = new QCheckBox();
         m_channelChecks[i]->setIcon(GUIToolKit::getIconByName(dotIcons[i]));
         m_channelChecks[i]->setText(channelNames[i]);
-        m_channelChecks[i]->setChecked(i == 0 || i == 6);
+        m_channelChecks[i]->setChecked(i == 0 || i == 1 || i == 5 || i == 6);
         connect(m_channelChecks[i], &QCheckBox::toggled, [this, i](bool checked) {
             emit channelToggled(i, checked);
         });
@@ -75,36 +74,37 @@ ControlPlotPanel::ControlPlotPanel(QWidget *parent)
     m_downsampleSpin = new QSpinBox();
     m_downsampleSpin->setRange(1, 10000);
     m_downsampleSpin->setValue(100);
-    connect(m_downsampleSpin, QOverload<int>::of(&QSpinBox::valueChanged),
-            this, &ControlPlotPanel::downsampleChanged);
+    connect(m_downsampleSpin,
+            QOverload<int>::of(&QSpinBox::valueChanged),
+            this,
+            &ControlPlotPanel::downsampleChanged);
     layout->addWidget(m_downsampleSpin);
 }
 
-GraphicWidget::GraphicWidget(QWidget *parent)
-    : QWidget(parent)
-    , m_device(SimpleFOCDevice::instance())
-    , m_xAxis(0)
+GraphicWidget::GraphicWidget(QWidget* parent)
+    : QWidget(parent), m_device(SimpleFOCDevice::instance()), m_xAxis(0)
 {
-    auto *mainLayout = new QVBoxLayout(this);
+    auto* mainLayout = new QVBoxLayout(this);
 
-    auto *titleLabel = new QLabel("Real time motor variables:");
+    auto* titleLabel = new QLabel("Real time motor variables:");
     mainLayout->addWidget(titleLabel);
 
     m_chart = new QChart();
     m_chart->legend()->setVisible(true);
     m_chart->legend()->setAlignment(Qt::AlignBottom);
 
-    auto *axisX = new QValueAxis();
+    auto* axisX = new QValueAxis();
     axisX->setRange(-BUFFER_SIZE, 0);
     axisX->setTitleText("Samples");
     m_chart->addAxis(axisX, Qt::AlignBottom);
 
-    auto *axisY = new QValueAxis();
+    auto* axisY = new QValueAxis();
     axisY->setRange(-100, 100);
     axisY->setTitleText("Value");
     m_chart->addAxis(axisY, Qt::AlignLeft);
 
-    for (int i = 0; i < 7; ++i) {
+    for(int i = 0; i < 7; ++i)
+    {
         m_series[i] = new QLineSeries();
         m_series[i]->setName(channelNames[i]);
         QPen pen(channelColors[i]);
@@ -127,43 +127,55 @@ GraphicWidget::GraphicWidget(QWidget *parent)
     m_controlPanel = new ControlPlotPanel(this);
     mainLayout->addWidget(m_controlPanel);
 
-    connect(m_controlPanel, &ControlPlotPanel::startStopClicked,
-            this, &GraphicWidget::onStartStop);
-    connect(m_controlPanel, &ControlPlotPanel::pauseContinueClicked,
-            this, &GraphicWidget::onPauseContinue);
-    connect(m_controlPanel, &ControlPlotPanel::viewAllClicked,
-            this, &GraphicWidget::onViewAll);
-    connect(m_controlPanel, &ControlPlotPanel::channelToggled,
-            this, &GraphicWidget::onChannelToggled);
-    connect(m_controlPanel, &ControlPlotPanel::downsampleChanged,
-            this, &GraphicWidget::onDownsampleChanged);
+    connect(m_controlPanel, &ControlPlotPanel::startStopClicked, this, &GraphicWidget::onStartStop);
+    connect(m_controlPanel,
+            &ControlPlotPanel::pauseContinueClicked,
+            this,
+            &GraphicWidget::onPauseContinue);
+    connect(m_controlPanel, &ControlPlotPanel::viewAllClicked, this, &GraphicWidget::onViewAll);
+    connect(
+        m_controlPanel, &ControlPlotPanel::channelToggled, this, &GraphicWidget::onChannelToggled);
+    connect(m_controlPanel,
+            &ControlPlotPanel::downsampleChanged,
+            this,
+            &GraphicWidget::onDownsampleChanged);
 
-    connect(m_device, &SimpleFOCDevice::monitoringDataReceived,
-            this, &GraphicWidget::onMonitoringDataReceived);
-    connect(m_device, &SimpleFOCDevice::connectionStateChanged,
-            this, &GraphicWidget::onConnectionStateChanged);
+    connect(m_device,
+            &SimpleFOCDevice::monitoringDataReceived,
+            this,
+            &GraphicWidget::onMonitoringDataReceived);
+    connect(m_device,
+            &SimpleFOCDevice::connectionStateChanged,
+            this,
+            &GraphicWidget::onConnectionStateChanged);
 }
 
-void GraphicWidget::onMonitoringDataReceived(const QList<double> &data)
+void GraphicWidget::onMonitoringDataReceived(const QList<double>& data)
 {
-    if (data.size() >= 7) {
-        for (int i = 0; i < 7; ++i) {
+    if(data.size() >= 7)
+    {
+        for(int i = 0; i < 7; ++i)
+        {
             m_buffers[i].removeFirst();
             m_buffers[i].append(data[i]);
         }
     }
-    if (m_state == ConnectedPlottingStartedState) {
+    if(m_state == ConnectedPlottingStartedState)
+    {
         updatePlot();
     }
 }
 
 void GraphicWidget::updatePlot()
 {
-    for (int i = 0; i < 7; ++i) {
-        if (!m_channelEnabled[i]) continue;
+    for(int i = 0; i < 7; ++i)
+    {
+        if(!m_channelEnabled[i])
+            continue;
         QVector<QPointF> points;
         points.reserve(BUFFER_SIZE);
-        for (int j = 0; j < BUFFER_SIZE; ++j) {
+        for(int j = 0; j < BUFFER_SIZE; ++j)
+        {
             points.append(QPointF(j - BUFFER_SIZE, m_buffers[i][j]));
         }
         m_series[i]->replace(points);
@@ -172,14 +184,18 @@ void GraphicWidget::updatePlot()
 
 void GraphicWidget::onStartStop()
 {
-    if (m_state == DisconnectedState) return;
+    if(m_state == DisconnectedState)
+        return;
 
-    if (m_state == ConnectedPlottingStartedState || m_state == ConnectedPausedState) {
+    if(m_state == ConnectedPlottingStartedState || m_state == ConnectedPausedState)
+    {
         m_state = InitialConnectedState;
         m_controlPanel->startStopBtn()->setIcon(GUIToolKit::getIconByName("start"));
         m_controlPanel->startStopBtn()->setToolTip("Start");
         m_device->sendMonitorDownsample(0);
-    } else {
+    }
+    else
+    {
         m_state = ConnectedPlottingStartedState;
         m_controlPanel->startStopBtn()->setIcon(GUIToolKit::getIconByName("stop"));
         m_controlPanel->startStopBtn()->setToolTip("Stop");
@@ -189,11 +205,14 @@ void GraphicWidget::onStartStop()
 
 void GraphicWidget::onPauseContinue()
 {
-    if (m_state == ConnectedPlottingStartedState) {
+    if(m_state == ConnectedPlottingStartedState)
+    {
         m_state = ConnectedPausedState;
         m_controlPanel->pauseBtn()->setIcon(GUIToolKit::getIconByName("continue"));
         m_controlPanel->pauseBtn()->setToolTip("Continue");
-    } else if (m_state == ConnectedPausedState) {
+    }
+    else if(m_state == ConnectedPausedState)
+    {
         m_state = ConnectedPlottingStartedState;
         m_controlPanel->pauseBtn()->setIcon(GUIToolKit::getIconByName("pause"));
         m_controlPanel->pauseBtn()->setToolTip("Pause");
@@ -203,7 +222,7 @@ void GraphicWidget::onPauseContinue()
 void GraphicWidget::onViewAll()
 {
     auto axes = m_chart->axes(Qt::Vertical);
-    if (!axes.isEmpty())
+    if(!axes.isEmpty())
         axes.first()->setRange(NAN, NAN);
 }
 
@@ -217,27 +236,31 @@ void GraphicWidget::onChannelToggled(int index, bool checked)
 void GraphicWidget::onDownsampleChanged(int value)
 {
     m_downsample = value;
-    if (m_state == ConnectedPlottingStartedState)
+    if(m_state == ConnectedPlottingStartedState)
         m_device->sendMonitorDownsample(value);
 }
 
 void GraphicWidget::onConnectionStateChanged(bool connected)
 {
-    if (connected) {
+    if(connected)
+    {
         m_state = InitialConnectedState;
-    } else {
+    }
+    else
+    {
         m_state = DisconnectedState;
-        for (int i = 0; i < 7; ++i)
+        for(int i = 0; i < 7; ++i)
             m_buffers[i].fill(0);
     }
 }
 
 void GraphicWidget::sendMonitorSetup()
 {
-    if (!m_device->getIsConnected()) return;
+    if(!m_device->getIsConnected())
+        return;
 
     QList<int> vars;
-    for (int i = 0; i < 7; ++i)
+    for(int i = 0; i < 7; ++i)
         vars.append(m_channelEnabled[i] ? 1 : 0);
 
     m_device->sendMonitorVariables(vars);

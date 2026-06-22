@@ -8,6 +8,7 @@
 class DRODisplayWidget;
 class ControlLoopConfig;
 class TorqueConfig;
+class HapticConfig;
 class ConnectionControl;
 class GraphicWidget;
 class PIDConfiguration;
@@ -20,23 +21,27 @@ class DeviceConfigurationTool : public QWidget
 {
     Q_OBJECT
 
-public:
-    explicit DeviceConfigurationTool(QWidget *parent = nullptr);
+    public:
+    explicit DeviceConfigurationTool(QWidget* parent = nullptr);
     QIcon getTabIcon() const;
     QString getTabName() const { return "Device"; }
 
-private:
-    SimpleFOCDevice *m_device;
-    DRODisplayWidget *m_dro;
-    ControlLoopConfig *m_controlLoop;
-    TorqueConfig *m_torqueConfig;
-    ConnectionControl *m_connectionControl;
-    GraphicWidget *m_graphicWidget;
-    PIDConfiguration *m_pidConfig;
-    GeneralControls *m_generalControls;
-    GeneralSettingsWidget *m_generalSettings;
-    CommandLineWidget *m_commandLine;
-    DeviceJoggingControl *m_joggingControl;
+    private slots:
+    void onConfigurationUpdated();
+
+    private:
+    SimpleFOCDevice* m_device;
+    DRODisplayWidget* m_dro;
+    ControlLoopConfig* m_controlLoop;
+    TorqueConfig* m_torqueConfig;
+    HapticConfig* m_hapticConfig;
+    ConnectionControl* m_connectionControl;
+    GraphicWidget* m_graphicWidget;
+    PIDConfiguration* m_pidConfig;
+    GeneralControls* m_generalControls;
+    GeneralSettingsWidget* m_generalSettings;
+    CommandLineWidget* m_commandLine;
+    DeviceJoggingControl* m_joggingControl;
 };
 
 #endif
