@@ -7,6 +7,7 @@
 #include <QValueAxis>
 #include <QAreaSeries>
 #include <QRandomGenerator>
+#include <QMargins>
 #include <cmath>
 
 // QtCharts types are available via the <QtCharts> include in the header
@@ -91,6 +92,8 @@ GraphicWidget::GraphicWidget(QWidget* parent)
 
     m_chart = new QChart();
     m_chart->legend()->setVisible(false);
+    m_chart->setMargins(QMargins(0, 0, 0, 0));
+    m_chart->layout()->setContentsMargins(0, 0, 0, 0);
 
     auto* axisX = new QValueAxis();
     axisX->setRange(-BUFFER_SIZE, 0);
@@ -124,6 +127,15 @@ GraphicWidget::GraphicWidget(QWidget* parent)
     m_controlPanel = new ControlPlotPanel(this);
     mainLayout->addWidget(m_controlPanel);
 
+    m_plotUpdateTimer = new QTimer(this);
+    m_plotUpdateTimer->setSingleShot(true);
+    connect(m_plotUpdateTimer, &QTimer::timeout, this, [this]() {
+        if(m_state == ConnectedPlottingStartedState) {
+            updatePlot();
+        }
+        m_plotUpdatePending = false;
+    });
+
     connect(m_controlPanel, &ControlPlotPanel::startStopClicked, this, &GraphicWidget::onStartStop);
     connect(m_controlPanel,
             &ControlPlotPanel::pauseContinueClicked,
@@ -149,33 +161,73 @@ GraphicWidget::GraphicWidget(QWidget* parent)
 
 void GraphicWidget::onMonitoringDataReceived(const QList<double>& data)
 {
-    if(data.size() >= 7)
-    {
-        for(int i = 0; i < 7; ++i)
-        {
+    int n = data.size();
+    if(n < 4 || n > 7)
+        return;
+
+    // Map received data to buffers based on count
+    // 4 values: target(0), Vq(1), velocity(5), angle(6)
+    // 7 values: target(0), Vq(1), Vd(2), Cq(3), Cd(4), velocity(5), angle(6)
+
+    // Always update target (index 0)
+    m_buffers[0].removeFirst();
+    m_buffers[0].append(data[0]);
+
+    // Update Vq (index 1)
+    m_buffers[1].removeFirst();
+    m_buffers[1].append(data[1]);
+
+    if(n >= 7) {
+        // Full 7-value data
+        for(int i = 2; i < 7; ++i) {
             m_buffers[i].removeFirst();
             m_buffers[i].append(data[i]);
         }
+    } else {
+        // 4-value data: target, Vq, velocity, angle
+        // velocity at index 2 -> buffer index 5
+        m_buffers[5].removeFirst();
+        m_buffers[5].append(data[2]);
+        // angle at index 3 -> buffer index 6
+        m_buffers[6].removeFirst();
+        m_buffers[6].append(data[3]);
     }
+
     if(m_state == ConnectedPlottingStartedState)
     {
-        updatePlot();
+        schedulePlotUpdate();
     }
 }
 
 void GraphicWidget::updatePlot()
 {
+    // Use more efficient point replacement
     for(int i = 0; i < 7; ++i)
     {
         if(!m_channelEnabled[i])
             continue;
-        QVector<QPointF> points;
-        points.reserve(BUFFER_SIZE);
-        for(int j = 0; j < BUFFER_SIZE; ++j)
+
+        // Directly replace points in the series
+        const QVector<QPointF>& currentPoints = m_series[i]->points();
+        if(currentPoints.size() != BUFFER_SIZE)
         {
-            points.append(QPointF(j - BUFFER_SIZE, m_buffers[i][j]));
+            // Full replacement needed (first time or size mismatch)
+            QVector<QPointF> points;
+            points.reserve(BUFFER_SIZE);
+            for(int j = 0; j < BUFFER_SIZE; ++j)
+            {
+                points.append(QPointF(j - BUFFER_SIZE, m_buffers[i][j]));
+            }
+            m_series[i]->replace(points);
         }
-        m_series[i]->replace(points);
+        else
+        {
+            // Update existing points more efficiently
+            for(int j = 0; j < BUFFER_SIZE; ++j)
+            {
+                m_series[i]->replace(j, QPointF(j - BUFFER_SIZE, m_buffers[i][j]));
+            }
+        }
     }
 }
 
@@ -262,4 +314,12 @@ void GraphicWidget::sendMonitorSetup()
 
     m_device->sendMonitorVariables(vars);
     m_device->sendMonitorDownsample(m_downsample);
+}
+
+void GraphicWidget::schedulePlotUpdate()
+{
+    if(!m_plotUpdatePending) {
+        m_plotUpdatePending = true;
+        m_plotUpdateTimer->start(100); // Update at most 10 times per second
+    }
 }

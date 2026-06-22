@@ -15,7 +15,7 @@ class CommandLineWidget : public QGroupBox
     Q_OBJECT
 
 public:
-    explicit CommandLineWidget(QWidget *parent = nullptr);
+    explicit CommandLineWidget(QWidget *parent = nullptr, bool filterMonitoringData = false);
     void appendText(const QString &text);
     void clearText();
 
@@ -32,6 +32,8 @@ private:
     QPushButton *m_sendBtn;
     QPushButton *m_clearBtn;
     QPushButton *m_listDevicesBtn;
+    static const int MAX_LINES = 1000;
+    bool m_filterMonitoringData;
 };
 
 #endif

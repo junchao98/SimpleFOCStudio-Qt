@@ -1,9 +1,11 @@
 #include "CommandLineWidget.h"
 #include "gui/shared/GUIToolKit.h"
 #include "core/SimpleFOCDevice.h"
+#include <QTextCursor>
+#include <QTextDocument>
 
-CommandLineWidget::CommandLineWidget(QWidget* parent)
-    : QGroupBox("Command Line interface", parent), m_device(SimpleFOCDevice::instance())
+CommandLineWidget::CommandLineWidget(QWidget* parent, bool filterMonitoringData)
+    : QGroupBox("Command Line interface", parent), m_device(SimpleFOCDevice::instance()), m_filterMonitoringData(filterMonitoringData)
 {
     auto* mainLayout = new QVBoxLayout(this);
 
@@ -37,10 +39,17 @@ CommandLineWidget::CommandLineWidget(QWidget* parent)
     mainLayout->addLayout(inputLayout);
 
     connect(m_commandInput, &QLineEdit::returnPressed, this, &CommandLineWidget::onSend);
-    connect(m_device,
-            &SimpleFOCDevice::commandDataReceived,
-            this,
-            &CommandLineWidget::onRawDataReceived);
+
+    // Connect to appropriate signal based on filter mode
+    if(m_filterMonitoringData) {
+        // In Device tab: only show command responses, not monitoring data
+        connect(m_device, &SimpleFOCDevice::commandDataReceived,
+                this, &CommandLineWidget::onRawDataReceived);
+    } else {
+        // In Command Line tab: show all data
+        connect(m_device, &SimpleFOCDevice::rawDataReceived,
+                this, &CommandLineWidget::onRawDataReceived);
+    }
 }
 
 void CommandLineWidget::appendText(const QString& text) { m_textDisplay->append(text); }
@@ -61,4 +70,17 @@ void CommandLineWidget::onClear() { clearText(); }
 
 void CommandLineWidget::onListDevices() { m_device->sendListDevices(); }
 
-void CommandLineWidget::onRawDataReceived(const QString& data) { appendText(data); }
+void CommandLineWidget::onRawDataReceived(const QString& data)
+{
+    // Limit text display to prevent memory issues
+    QTextDocument* doc = m_textDisplay->document();
+    if(doc->lineCount() > MAX_LINES) {
+        // Remove old lines to limit memory usage
+        QTextCursor cursor(doc);
+        cursor.movePosition(QTextCursor::Start);
+        cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
+        cursor.removeSelectedText();
+        cursor.deleteChar(); // Remove newline
+    }
+    appendText(data);
+}

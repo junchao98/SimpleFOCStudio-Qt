@@ -13,6 +13,6 @@ DeviceInteractionFrame::DeviceInteractionFrame(QWidget *parent)
     m_graphicWidget = new GraphicWidget(this);
     layout->addWidget(m_graphicWidget, 1);
 
-    m_commandLine = new CommandLineWidget(this);
+    m_commandLine = new CommandLineWidget(this, true);  // Filter monitoring data
     layout->addWidget(m_commandLine);
 }
