@@ -2,6 +2,7 @@
 #include "DRODisplayWidget.h"
 #include "ControlLoopConfig.h"
 #include "TorqueConfig.h"
+#include "HapticConfig.h"
 #include "ConnectionControl.h"
 #include "GraphicWidget.h"
 #include "PIDConfiguration.h"
@@ -14,13 +15,12 @@
 #include <QHBoxLayout>
 #include <QSplitter>
 
-DeviceConfigurationTool::DeviceConfigurationTool(QWidget *parent)
-    : QWidget(parent)
-    , m_device(SimpleFOCDevice::instance())
+DeviceConfigurationTool::DeviceConfigurationTool(QWidget* parent)
+    : QWidget(parent), m_device(SimpleFOCDevice::instance())
 {
-    auto *mainLayout = new QVBoxLayout(this);
+    auto* mainLayout = new QVBoxLayout(this);
 
-    auto *topRow = new QHBoxLayout();
+    auto* topRow = new QHBoxLayout();
 
     m_dro = new DRODisplayWidget(this);
     topRow->addWidget(m_dro);
@@ -31,6 +31,9 @@ DeviceConfigurationTool::DeviceConfigurationTool(QWidget *parent)
     m_torqueConfig = new TorqueConfig(this);
     topRow->addWidget(m_torqueConfig);
 
+    m_hapticConfig = new HapticConfig(this);
+    topRow->addWidget(m_hapticConfig);
+
     m_connectionControl = new ConnectionControl(this);
     topRow->addWidget(m_connectionControl);
 
@@ -39,29 +42,42 @@ DeviceConfigurationTool::DeviceConfigurationTool(QWidget *parent)
     m_graphicWidget = new GraphicWidget(this);
     mainLayout->addWidget(m_graphicWidget, 1);
 
-    auto *bottomRow = new QHBoxLayout();
+    auto* bottomRow = new QHBoxLayout();
 
     m_pidConfig = new PIDConfiguration(this);
     bottomRow->addWidget(m_pidConfig, 2);
 
-    auto *middleCol = new QVBoxLayout();
+    auto* middleCol   = new QVBoxLayout();
     m_generalControls = new GeneralControls(this);
     middleCol->addWidget(m_generalControls);
     m_generalSettings = new GeneralSettingsWidget(this);
     middleCol->addWidget(m_generalSettings);
     bottomRow->addLayout(middleCol, 2);
 
-    auto *rightCol = new QVBoxLayout();
-    m_commandLine = new CommandLineWidget(this);
+    auto* rightCol = new QVBoxLayout();
+    m_commandLine  = new CommandLineWidget(this);
+    m_commandLine->setMaximumHeight(200);
     rightCol->addWidget(m_commandLine);
     m_joggingControl = new DeviceJoggingControl(this);
     rightCol->addWidget(m_joggingControl);
     bottomRow->addLayout(rightCol, 3);
 
     mainLayout->addLayout(bottomRow);
+
+    connect(m_device,
+            &SimpleFOCDevice::configurationUpdated,
+            this,
+            &DeviceConfigurationTool::onConfigurationUpdated);
+
+    onConfigurationUpdated();
 }
 
-QIcon DeviceConfigurationTool::getTabIcon() const
+void DeviceConfigurationTool::onConfigurationUpdated()
 {
-    return GUIToolKit::getIconByName("motor");
+    const bool haptic = (m_device->controlType == SimpleFOCDevice::HAPTIC_CONTROL);
+    m_hapticConfig->setVisible(haptic);
+    m_torqueConfig->setVisible(!haptic);
+    m_pidConfig->setVisible(!haptic);
 }
+
+QIcon DeviceConfigurationTool::getTabIcon() const { return GUIToolKit::getIconByName("motor"); }

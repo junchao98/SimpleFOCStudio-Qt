@@ -31,6 +31,7 @@ set(SOURCES
     src/gui/formview/GeneralSettingsWidget.cpp
     src/gui/formview/DeviceJoggingControl.cpp
     src/gui/formview/DeviceConfigurationTool.cpp
+    src/gui/formview/HapticConfig.cpp
     src/gui/treeview/DeviceTreeWidget.cpp
     src/gui/treeview/DevicesInspectorTree.cpp
     src/gui/treeview/DeviceInteractionFrame.cpp
@@ -66,6 +67,7 @@ set(HEADERS
     src/gui/formview/GeneralSettingsWidget.h
     src/gui/formview/DeviceJoggingControl.h
     src/gui/formview/DeviceConfigurationTool.h
+    src/gui/formview/HapticConfig.h
     src/gui/treeview/DeviceTreeWidget.h
     src/gui/treeview/DevicesInspectorTree.h
     src/gui/treeview/DeviceInteractionFrame.h

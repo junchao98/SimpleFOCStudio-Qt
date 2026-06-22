@@ -2,19 +2,17 @@
 #include "gui/shared/GUIToolKit.h"
 #include "core/SimpleFOCDevice.h"
 
-CommandLineWidget::CommandLineWidget(QWidget *parent)
-    : QGroupBox("Command Line interface", parent)
-    , m_device(SimpleFOCDevice::instance())
+CommandLineWidget::CommandLineWidget(QWidget* parent)
+    : QGroupBox("Command Line interface", parent), m_device(SimpleFOCDevice::instance())
 {
-    auto *mainLayout = new QVBoxLayout(this);
+    auto* mainLayout = new QVBoxLayout(this);
 
     m_textDisplay = new QTextEdit();
     m_textDisplay->setReadOnly(true);
-    m_textDisplay->setMaximumHeight(150);
-    mainLayout->addWidget(m_textDisplay);
+    mainLayout->addWidget(m_textDisplay, 1);
 
-    auto *inputLayout = new QHBoxLayout();
-    m_commandInput = new QLineEdit();
+    auto* inputLayout = new QHBoxLayout();
+    m_commandInput    = new QLineEdit();
     m_commandInput->setPlaceholderText("Command:");
     inputLayout->addWidget(m_commandInput);
 
@@ -39,39 +37,28 @@ CommandLineWidget::CommandLineWidget(QWidget *parent)
     mainLayout->addLayout(inputLayout);
 
     connect(m_commandInput, &QLineEdit::returnPressed, this, &CommandLineWidget::onSend);
-    connect(m_device, &SimpleFOCDevice::rawDataReceived, this, &CommandLineWidget::onRawDataReceived);
+    connect(m_device,
+            &SimpleFOCDevice::commandDataReceived,
+            this,
+            &CommandLineWidget::onRawDataReceived);
 }
 
-void CommandLineWidget::appendText(const QString &text)
-{
-    m_textDisplay->append(text);
-}
+void CommandLineWidget::appendText(const QString& text) { m_textDisplay->append(text); }
 
-void CommandLineWidget::clearText()
-{
-    m_textDisplay->clear();
-}
+void CommandLineWidget::clearText() { m_textDisplay->clear(); }
 
 void CommandLineWidget::onSend()
 {
     QString cmd = m_commandInput->text().trimmed();
-    if (!cmd.isEmpty()) {
+    if(!cmd.isEmpty())
+    {
         m_device->sendCommand(cmd);
         m_commandInput->clear();
     }
 }
 
-void CommandLineWidget::onClear()
-{
-    clearText();
-}
+void CommandLineWidget::onClear() { clearText(); }
 
-void CommandLineWidget::onListDevices()
-{
-    m_device->sendListDevices();
-}
+void CommandLineWidget::onListDevices() { m_device->sendListDevices(); }
 
-void CommandLineWidget::onRawDataReceived(const QString &data)
-{
-    appendText(data);
-}
+void CommandLineWidget::onRawDataReceived(const QString& data) { appendText(data); }
