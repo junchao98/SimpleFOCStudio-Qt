@@ -46,12 +46,25 @@ mkdir -p "${STAGE_DIR}/usr/bin"
 mkdir -p "${STAGE_DIR}/usr/share/applications"
 mkdir -p "${STAGE_DIR}/usr/share/icons/hicolor/256x256/apps"
 
-# copy DEBIAN/control
-cp "${DEB_META_DIR}/control" "${STAGE_DIR}/DEBIAN/control"
+# copy DEBIAN/control (rewrite version)
+sed "s/^Version: .*/Version: ${VERSION}/" "${DEB_META_DIR}/control" > "${STAGE_DIR}/DEBIAN/control"
 
 # copy binary
 cp "${BINARY}" "${STAGE_DIR}/usr/bin/SimpleFOCStudio"
 strip "${STAGE_DIR}/usr/bin/SimpleFOCStudio"
+
+# auto-detect shared library dependencies from binary
+DEPS_WORK_DIR=$(mktemp -d)
+mkdir -p "${DEPS_WORK_DIR}/debian"
+printf "Source: simplefocstudio\nPackage: simplefocstudio\nArchitecture: any\n" > "${DEPS_WORK_DIR}/debian/control"
+DEPS=$(cd "${DEPS_WORK_DIR}" && dpkg-shlibdeps -O "${STAGE_DIR}/usr/bin/SimpleFOCStudio" 2>/dev/null \
+       | grep '^shlibs:Depends=' | cut -d= -f2-)
+rm -rf "${DEPS_WORK_DIR}"
+if [ -z "${DEPS}" ]; then
+    DEPS="libqt6core6, libqt6gui6, libqt6widgets6, libqt6serialport6, libqt6charts6, libc6, libgcc-s1, libstdc++6"
+fi
+echo "Detected dependencies: ${DEPS}"
+sed -i "s/\${shlibs:Depends}/${DEPS}/" "${STAGE_DIR}/DEBIAN/control"
 
 # copy desktop entry
 if [ -f "${SCRIPT_DIR}/simplefocstudio.desktop" ]; then

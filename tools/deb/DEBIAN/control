@@ -3,7 +3,7 @@ Version: 0.0.0
 Section: electronics
 Priority: optional
 Architecture: amd64
-Depends: libqt6core6, libqt6gui6, libqt6widgets6, libqt6serialport6, libqt6charts6, libqt6opengl6, libqt6dbus6, libc6, libgcc-s1, libstdc++6
+Depends: ${shlibs:Depends}
 Maintainer: junchao98
 Description: SimpleFOC Configuration Tool (Qt C++ Edition)
  A GUI tool for configuring and tuning SimpleFOC motor controllers.

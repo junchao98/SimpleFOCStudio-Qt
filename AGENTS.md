@@ -35,9 +35,9 @@ GUI 类均为 Qt Designer 风格的 `.h/.cpp` 配对，CMake 启用了 `AUTOMOC`
 
 单一 workflow `.github/workflows/build-windows.yml`（虽然名字叫 build-windows，实际构建所有平台）：
 - **Windows**: Qt 6.8.3 MSVC 2022 + `windeployqt` → zip 产物
-- **Ubuntu 22.04/24.04**: Qt 6.8.3 + `dpkg-deb` → `.deb` 产物
+- **Ubuntu 22.04/24.04**: 系统 Qt6（apt 安装）+ `dpkg-deb` → `.deb` 产物
 
-deb 版本号由仓库变量 `RELEASE_VERSION` 驱动（CI 中通过 `sed` 注入 `tools/deb/DEBIAN/control`，未设置时回退为 `0.0.0-dev`）。升版本只需更新该变量：
+deb 版本号由仓库变量 `RELEASE_VERSION` 驱动（CI 中通过 `sed` 注入 `tools/deb/DEBIAN/control`，未设置时回退为 `0.0.0-dev`）。deb 的 `Depends` 字段由 `dpkg-shlibdeps` 从二进制自动检测生成，确保依赖与编译时 Qt 版本一致。升版本只需更新该变量：
 
 ```bash
 gh variable set RELEASE_VERSION --body "0.1.0"
@@ -51,11 +51,11 @@ gh variable set RELEASE_VERSION --body "0.1.0"
 ./tools/deb/build.sh
 ```
 
-在项目根目录生成 `simplefocstudio_<version>_amd64.deb`。依赖系统 Qt6（apt 安装），与 CI 中 `install-qt-action` 安装的 Qt 不兼容。
+在项目根目录生成 `simplefocstudio_<version>_amd64.deb`。CI 和本地打包均依赖系统 Qt6（apt 安装），`Depends` 由 `dpkg-shlibdeps` 自动检测。
 
 ## 约定
 
-- 无测试套件，通过编译和运行验证
+- 无测试套件（`tests/test_ui.cpp` 为 QTest UI 测试，需 `cmake -DBUILD_TESTING=ON`），通过编译和运行验证
 - Qt6 必需组件：`Core`、`Gui`、`Widgets`、`SerialPort`、`Charts`
 - C++17 标准
 - 图标通过 `GUIToolKit::loadIcon()` 从 qrc 路径 `:/icons/<name>.png` 加载
