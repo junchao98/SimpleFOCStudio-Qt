@@ -60,8 +60,12 @@ void GeneralControls::onConnectionStateChanged(bool connected)
 void GeneralControls::onConfigurationUpdated()
 {
     if (m_device->deviceStatus == 1) {
+        // Device is enabled, show "Disable Device" with red icon
         m_enableBtn->setText("Disable Device");
+        m_enableBtn->setIcon(GUIToolKit::getIconByName("stop"));
     } else {
+        // Device is disabled, show "Enable Device" with green icon
         m_enableBtn->setText("Enable Device");
+        m_enableBtn->setIcon(GUIToolKit::getIconByName("start"));
     }
 }

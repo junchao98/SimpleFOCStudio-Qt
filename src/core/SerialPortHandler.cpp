@@ -98,7 +98,15 @@ void SerialPortHandler::handleReceivedData(const QString &data)
             double v = p.trimmed().toDouble(&ok);
             if (ok) values.append(v);
         }
-        emit monitoringDataReceived(values);
+        // Accept monitoring data with 4-7 values (common configs: 4 or 7 variables)
+        // 4 values: target, Vq, velocity, angle
+        // 7 values: target, Vq, Vd, Cq, Cd, velocity, angle
+        if (values.size() >= 4 && values.size() <= 7) {
+            emit monitoringDataReceived(values);
+        } else {
+            // Not valid monitoring data, treat as command data
+            emit commandDataReceived(data);
+        }
     } else if (isStateData(data)) {
         emit stateMonitorReceived(data);
     } else {

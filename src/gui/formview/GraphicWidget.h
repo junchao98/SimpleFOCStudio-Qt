@@ -7,6 +7,7 @@
 #include <QCheckBox>
 #include <QPushButton>
 #include <QSpinBox>
+#include <QTimer>
 
 QT_BEGIN_NAMESPACE
 class QChartView;
@@ -45,6 +46,7 @@ class GraphicWidget : public QWidget
     private:
     void updatePlot();
     void sendMonitorSetup();
+    void schedulePlotUpdate();
 
     QChartView* m_chartView;
     QChart* m_chart;
@@ -55,6 +57,8 @@ class GraphicWidget : public QWidget
 
     bool m_channelEnabled[7] = {true, true, false, false, false, true, true};
     int m_downsample         = 100;
+    bool m_plotUpdatePending = false;
+    QTimer* m_plotUpdateTimer = nullptr;
 
     SimpleFOCDevice* m_device;
     ControlPlotPanel* m_controlPanel;
