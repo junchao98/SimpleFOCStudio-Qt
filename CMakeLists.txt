@@ -9,8 +9,9 @@ set(CMAKE_AUTOUIC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets SerialPort Charts)
 
+option(BUILD_TESTING "Build tests" OFF)
+
 set(SOURCES
-    src/main.cpp
     src/core/SimpleFOCDevice.cpp
     src/core/SerialPortHandler.cpp
     src/core/StateUpdateRunner.cpp
@@ -76,18 +77,17 @@ set(HEADERS
     src/gui/ToolBar.h
 )
 
+add_library(simplefoc_lib STATIC ${SOURCES} ${HEADERS})
+target_include_directories(simplefoc_lib PUBLIC ${CMAKE_SOURCE_DIR}/src)
+target_link_libraries(simplefoc_lib PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets Qt6::SerialPort Qt6::Charts)
+
 qt_add_executable(SimpleFOCStudio
-    ${SOURCES}
-    ${HEADERS}
+    src/main.cpp
     resources/resources.qrc
 )
+target_link_libraries(SimpleFOCStudio PRIVATE simplefoc_lib)
 
-target_include_directories(SimpleFOCStudio PRIVATE ${CMAKE_SOURCE_DIR}/src)
-
-target_link_libraries(SimpleFOCStudio PRIVATE
-    Qt6::Core
-    Qt6::Gui
-    Qt6::Widgets
-    Qt6::SerialPort
-    Qt6::Charts
-)
+if(BUILD_TESTING)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
