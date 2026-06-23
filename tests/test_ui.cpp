@@ -25,6 +25,7 @@ class TestUI : public QObject
 
     private slots:
     void testOpenSerialConnection();
+    void testEnableDisableMotor();
 };
 
 // Locate the read-only QTextEdit inside the "Command Line interface" QGroupBox
@@ -200,6 +201,89 @@ void TestUI::testOpenSerialConnection()
     QVERIFY2(hasData, "Chart has no data points after starting monitoring");
 
     // Cleanup: disconnect
+    SimpleFOCDevice::instance()->disconnectDevice();
+}
+
+void TestUI::testEnableDisableMotor()
+{
+    MainWindow window;
+    window.show();
+    QVERIFY(QTest::qWaitForWindowExposed(&window));
+
+    // Open Tree View
+    QAction* treeAction = nullptr;
+    for(auto* action : window.findChildren<QAction*>())
+    {
+        if(action->text() == "Tree View")
+        {
+            treeAction = action;
+            break;
+        }
+    }
+    QVERIFY2(treeAction, "Tree View action not found");
+    treeAction->trigger();
+    QTest::qWait(200);
+
+    // Configure serial port
+    const QString targetPort = "ttyUSB4";
+    auto* configureBtn       = findButtonByText(&window, "Configure");
+    QVERIFY2(configureBtn, "Configure button not found");
+    QTimer::singleShot(500, [&]() {
+        auto* dlg = qApp->activeModalWidget();
+        QVERIFY2(dlg, "Configure dialog did not appear");
+        auto* portCombo = dlg->findChild<QComboBox*>();
+        portCombo->addItem(targetPort);
+        portCombo->setCurrentText(targetPort);
+        auto* btnBox = dlg->findChild<QDialogButtonBox*>();
+        QTest::mouseClick(btnBox->button(QDialogButtonBox::Ok), Qt::LeftButton);
+    });
+    QTest::mouseClick(configureBtn, Qt::LeftButton);
+    QTest::qWait(1000);
+
+    // Connect
+    auto* connectBtn = findButtonByText(&window, "Connect");
+    QVERIFY2(connectBtn, "Connect button not found");
+    QTimer::singleShot(500, [&]() {
+        auto* msgBox = qobject_cast<QMessageBox*>(qApp->activeModalWidget());
+        if(msgBox)
+            msgBox->close();
+    });
+    QTest::mouseClick(connectBtn, Qt::LeftButton);
+    QTest::qWait(2000); // wait for pull config + state polling
+
+    QVERIFY2(SimpleFOCDevice::instance()->getIsConnected(), "Device not connected");
+
+    // Find the enable/disable toggle button (text changes between the two)
+    auto findEnableBtn = [&]() -> QPushButton* {
+        for(auto* btn : window.findChildren<QPushButton*>())
+        {
+            if(btn->text() == "Enable Device" || btn->text() == "Disable Device")
+                return btn;
+        }
+        return nullptr;
+    };
+
+    auto* enableBtn = findEnableBtn();
+    QVERIFY2(enableBtn, "Enable/Disable Device button not found");
+
+    // Cycle enable/disable several times — this reproduces the crash scenario
+    for(int i = 0; i < 5; ++i)
+    {
+        int before = SimpleFOCDevice::instance()->deviceStatus;
+        qDebug() << "Cycle" << (i + 1) << "status before:" << before
+                 << "| button:" << enableBtn->text();
+
+        QTest::mouseClick(enableBtn, Qt::LeftButton);
+        QTest::qWait(500); // allow serial response + UI update
+
+        int after = SimpleFOCDevice::instance()->deviceStatus;
+        qDebug() << "  status after:" << after << "| button:" << enableBtn->text();
+    }
+
+    // If we reach here the app did not crash
+    QVERIFY2(SimpleFOCDevice::instance()->getIsConnected(),
+             "Lost connection during enable/disable cycling");
+
     SimpleFOCDevice::instance()->disconnectDevice();
 }
 
