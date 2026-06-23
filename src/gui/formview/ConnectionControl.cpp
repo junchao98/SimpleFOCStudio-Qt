@@ -7,24 +7,23 @@
 #include <QLabel>
 #include <QMessageBox>
 
-ConnectionControl::ConnectionControl(QWidget *parent)
-    : QGroupBox("Connection control", parent)
-    , m_device(SimpleFOCDevice::instance())
+ConnectionControl::ConnectionControl(QWidget* parent)
+    : QGroupBox("Connection control", parent), m_device(SimpleFOCDevice::instance())
 {
-    auto *layout = new QVBoxLayout(this);
+    auto* layout = new QVBoxLayout(this);
 
-    auto *cmdLayout = new QHBoxLayout();
+    auto* cmdLayout = new QHBoxLayout();
     cmdLayout->addWidget(new QLabel("Command:"));
     m_commandIdEdit = new QLineEdit("M");
     m_commandIdEdit->setMaximumWidth(50);
-    connect(m_commandIdEdit, &QLineEdit::textChanged, [this](const QString &t) {
+    connect(m_commandIdEdit, &QLineEdit::textChanged, [this](const QString& t) {
         m_device->devCommandID = t;
     });
     cmdLayout->addWidget(m_commandIdEdit);
     cmdLayout->addStretch();
     layout->addLayout(cmdLayout);
 
-    auto *btnLayout = new QHBoxLayout();
+    auto* btnLayout = new QHBoxLayout();
 
     m_pullBtn = new QPushButton("Pull Params");
     m_pullBtn->setIcon(GUIToolKit::getIconByName("pull"));
@@ -49,23 +48,19 @@ ConnectionControl::ConnectionControl(QWidget *parent)
 
     layout->addLayout(btnLayout);
 
-    connect(m_device, &SimpleFOCDevice::connectionStateChanged,
-            this, &ConnectionControl::onConnectionStateChanged);
+    connect(m_device,
+            &SimpleFOCDevice::connectionStateChanged,
+            this,
+            &ConnectionControl::onConnectionStateChanged);
 }
 
-void ConnectionControl::onConnect()
-{
-    m_device->connectDevice(SimpleFOCDevice::PULL_CONFIG);
-}
+void ConnectionControl::onConnect() { m_device->connectDevice(SimpleFOCDevice::PULL_CONFIG); }
 
-void ConnectionControl::onDisconnect()
-{
-    m_device->disconnectDevice();
-}
+void ConnectionControl::onDisconnect() { m_device->disconnectDevice(); }
 
 void ConnectionControl::onPullParams()
 {
-    if (m_device->getIsConnected())
+    if(m_device->getIsConnected())
         m_device->pullConfiguration();
 }
 
@@ -86,16 +81,15 @@ void ConnectionControl::onConfigureClicked()
     dlg.setParity(m_device->serialParity);
     dlg.setByteSize(m_device->serialByteSize);
     dlg.setStopBits(m_device->stopBits);
-    dlg.setConnectionID(m_device->connectionID);
 
-    if (dlg.exec() == QDialog::Accepted) {
+    if(dlg.exec() == QDialog::Accepted)
+    {
         QVariantMap config;
         config["serialPortName"] = dlg.portName();
-        config["serialRate"] = dlg.baudRate();
+        config["serialRate"]     = dlg.baudRate();
         config["serialByteSize"] = dlg.byteSize();
-        config["serialParity"] = dlg.parity();
-        config["stopBits"] = dlg.stopBits();
-        config["connectionID"] = dlg.connectionID();
+        config["serialParity"]   = dlg.parity();
+        config["stopBits"]       = dlg.stopBits();
         m_device->configureConnection(config);
     }
 }

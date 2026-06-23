@@ -79,7 +79,6 @@ void SimpleFOCDevice::configureDevice(const QVariantMap& json)
     phaseResistance      = json["phaseResistance"].toDouble();
     initialTarget        = json["initialTarget"].toDouble();
 
-    connectionID   = json["connectionID"].toString();
     serialPortName = json["serialPortName"].toString();
     serialRate     = json["serialRate"].toInt();
     serialByteSize = json["serialByteSize"].toInt();
@@ -102,7 +101,6 @@ void SimpleFOCDevice::configureDevice(const QVariantMap& json)
 
 void SimpleFOCDevice::configureConnection(const QVariantMap& config)
 {
-    connectionID   = config["connectionID"].toString();
     serialPortName = config["serialPortName"].toString();
     serialRate     = config["serialRate"].toInt();
     serialByteSize = config["serialByteSize"].toInt();
@@ -132,7 +130,6 @@ QVariantMap SimpleFOCDevice::toJSON() const
     m["sensorZeroOffset"]     = sensorZeroOffset;
     m["sensorElectricalZero"] = sensorElectricalZero;
     m["initialTarget"]        = initialTarget;
-    m["connectionID"]         = connectionID;
     m["serialPortName"]       = serialPortName;
     m["serialRate"]           = serialRate;
     m["serialByteSize"]       = serialByteSize;

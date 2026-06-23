@@ -202,7 +202,6 @@ class SimpleFOCDevice : public QObject
     int serialByteSize   = 8;
     QString serialParity = "N";
     double stopBits      = 1;
-    QString connectionID;
     QString devCommandID = "M";
 
     SerialPortHandler* commProvider = nullptr;
