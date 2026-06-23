@@ -5,8 +5,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 DEB_META_DIR="${SCRIPT_DIR}/DEBIAN"
 
-# parse version from DEBIAN/control
-VERSION=$(grep -oP '(?<=Version: ).*' "${DEB_META_DIR}/control" | tr -d '[:space:]')
+# VERSION 可通过环境变量覆盖；否则从 DEBIAN/control 解析
+VERSION="${VERSION:-}"
+if [ -z "${VERSION}" ]; then
+    VERSION=$(grep -oP '(?<=Version: ).*' "${DEB_META_DIR}/control" | tr -d '[:space:]')
+fi
 if [ -z "${VERSION}" ]; then
     echo "ERROR: cannot find Version in ${DEB_META_DIR}/control"
     exit 1

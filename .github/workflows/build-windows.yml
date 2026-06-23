@@ -72,8 +72,9 @@ jobs:
         run: cmake --build build --config Release --parallel
 
       - name: Build deb package
+        env:
+          VERSION: ${{ vars.RELEASE_VERSION || '0.0.0-dev' }}
         run: |
-          VERSION="1.0.0"
           OS_TAG="${{ matrix.os }}"
           DEB_FILENAME="simplefocstudio_${VERSION}_amd64_${OS_TAG}.deb"
 
@@ -84,7 +85,7 @@ jobs:
           mkdir -p "${STAGE_DIR}/usr/share/applications"
           mkdir -p "${STAGE_DIR}/usr/share/icons/hicolor/256x256/apps"
 
-          cp tools/deb/DEBIAN/control "${STAGE_DIR}/DEBIAN/control"
+          sed "s/^Version: .*/Version: ${VERSION}/" tools/deb/DEBIAN/control > "${STAGE_DIR}/DEBIAN/control"
           cp build/SimpleFOCStudio "${STAGE_DIR}/usr/bin/SimpleFOCStudio"
           strip "${STAGE_DIR}/usr/bin/SimpleFOCStudio"
           cp tools/deb/simplefocstudio.desktop "${STAGE_DIR}/usr/share/applications/"

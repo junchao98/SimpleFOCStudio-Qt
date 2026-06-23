@@ -37,7 +37,13 @@ GUI 类均为 Qt Designer 风格的 `.h/.cpp` 配对，CMake 启用了 `AUTOMOC`
 - **Windows**: Qt 6.8.3 MSVC 2022 + `windeployqt` → zip 产物
 - **Ubuntu 22.04/24.04**: Qt 6.8.3 + `dpkg-deb` → `.deb` 产物
 
-版本号硬编码在两处：`tools/deb/DEBIAN/control` 和 CI workflow 的 `Build deb package` 步骤中。升版本时需同时修改。
+deb 版本号由仓库变量 `RELEASE_VERSION` 驱动（CI 中通过 `sed` 注入 `tools/deb/DEBIAN/control`，未设置时回退为 `0.0.0-dev`）。升版本只需更新该变量：
+
+```bash
+gh variable set RELEASE_VERSION --body "0.1.0"
+```
+
+本地打包可用 `VERSION` 环境变量覆盖，否则读取 `control` 中的 `Version` 字段。
 
 ## 本地 deb 打包
 
